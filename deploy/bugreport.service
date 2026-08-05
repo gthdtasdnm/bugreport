@@ -1,0 +1,43 @@
+[Unit]
+Description=Bugreport – Fehlermeldungen zu den vier Spielen
+After=network.target
+
+[Service]
+Type=simple
+
+# ---- Ggf. anpassen -------------------------------------------------------
+# ExecStart braucht den vollen Pfad zum deno-Binary (`which deno`).
+# Wichtig: das Binary muss für www-data lesbar sein – liegt es unter
+# /root/.deno/bin/, nach /usr/local/bin/deno kopieren.
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/html/bugreport
+ExecStart=/usr/local/bin/deno run --allow-net --allow-read --allow-write --allow-env --allow-sys server.js
+Environment=PORT=8079
+# Nur lokal binden – erreichbar ist der Dienst ausschließlich über Apache.
+Environment=HOST=127.0.0.1
+
+# Die Meldungen liegen NICHT im DocumentRoot, sonst wären sie als Datei
+# abrufbar und ein `git pull` könnte sie überschreiben.
+Environment=BUGREPORT_DATA=/var/lib/bugreport/reports.json
+# Vor dem ersten Start setzen, sonst würfelt der Dienst bei jedem Neustart
+# ein neues Passwort:  systemctl edit bugreport  →  Environment=BUGREPORT_ADMIN_TOKEN=…
+Environment=BUGREPORT_ADMIN_TOKEN=bitte-aendern
+# --------------------------------------------------------------------------
+
+# www-data darf nicht in sein Home schreiben; Deno legt seinen Cache sonst
+# dort an und startet nicht. PrivateTmp macht das /tmp prozess-eigen.
+Environment=DENO_DIR=/tmp/deno-cache
+
+Restart=always
+RestartSec=3
+
+NoNewPrivileges=true
+PrivateTmp=true
+# ProtectSystem=full macht /usr und /etc schreibgeschützt, /var bleibt
+# beschreibbar – genau das braucht der Dienst für /var/lib/bugreport.
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

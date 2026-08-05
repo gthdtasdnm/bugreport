@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Bugreport – Fehler in den Spielen melden</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐞</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="wrap">
+
+  <header class="brand">
+    <h1 class="logo">BUG<span>REPORT</span></h1>
+    <p class="tag">Etwas kaputt? Hier rein.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="seg sel" data-tab="melden">Fehler melden</button>
+    <button class="seg" data-tab="liste">Gemeldete Fehler</button>
+  </div>
+
+  <!-- ===================== Melden ===================== -->
+  <section id="tab-melden" class="panel">
+    <label class="field">
+      <span>Welches Spiel</span>
+      <select id="spiel">
+        <option value="">– bitte auswählen –</option>
+        <option value="reflex">Reflex Royale</option>
+        <option value="pickup">PickUp</option>
+        <option value="magictowers">Magic Towers</option>
+        <option value="double">Double</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Was ist passiert – in einem Satz</span>
+      <input id="titel" type="text" maxlength="120" placeholder="z.&nbsp;B. Spiel hängt nach der letzten Runde">
+    </label>
+
+    <label class="field">
+      <span>Beschreibung</span>
+      <textarea id="beschreibung" maxlength="2000"
+                placeholder="Was hast du erwartet, was ist stattdessen passiert? Gerne mit Gerät und Browser."></textarea>
+    </label>
+
+    <label class="field">
+      <span>Wie kann man es nachstellen (optional)</span>
+      <textarea id="schritte" maxlength="2000"
+                placeholder="1. Raum eröffnen&#10;2. Zu zweit beitreten&#10;3. …"></textarea>
+    </label>
+
+    <div class="setting">
+      <span class="setting-label">Wie schlimm</span>
+      <div class="segmented" id="schwere">
+        <button class="seg" data-schwere="klein">Kleinigkeit</button>
+        <button class="seg sel" data-schwere="stoert">Stört</button>
+        <button class="seg" data-schwere="abbruch">Spiel kaputt</button>
+      </div>
+    </div>
+
+    <label class="field">
+      <span>Dein Name (optional)</span>
+      <input id="melder" type="text" maxlength="40" placeholder="z.&nbsp;B. Alex" autocomplete="nickname">
+    </label>
+
+    <!-- Bots füllen dieses Feld aus, Menschen sehen es nie. -->
+    <div class="falle" aria-hidden="true">
+      <label>Webseite <input id="webseite" type="text" tabindex="-1" autocomplete="off"></label>
+    </div>
+
+    <button id="senden" class="btn primary big">Meldung abschicken</button>
+    <p class="small muted center">
+      Die Meldung ist öffentlich sichtbar. Bitte keine Passwörter oder Adressen hineinschreiben.
+    </p>
+  </section>
+
+  <!-- ===================== Liste ===================== -->
+  <section id="tab-liste" hidden>
+    <div class="zahlen">
+      <span class="zahl offen">Offen <b id="zahlOffen">0</b></span>
+      <span class="zahl erledigt">Erledigt <b id="zahlErledigt">0</b></span>
+      <span class="zahl">Gesamt <b id="zahlGesamt">0</b></span>
+    </div>
+
+    <div class="filter" style="margin: 14px 0">
+      <button class="chip sel" data-filter-spiel="">Alle Spiele</button>
+      <button class="chip" data-filter-spiel="reflex">Reflex Royale</button>
+      <button class="chip" data-filter-spiel="pickup">PickUp</button>
+      <button class="chip" data-filter-spiel="magictowers">Magic Towers</button>
+      <button class="chip" data-filter-spiel="double">Double</button>
+    </div>
+    <div class="filter" style="margin-bottom: 14px">
+      <button class="chip sel" data-filter-status="offen">Nur offene</button>
+      <button class="chip" data-filter-status="erledigt">Nur erledigte</button>
+      <button class="chip" data-filter-status="">Alle</button>
+    </div>
+
+    <div id="liste" class="liste"></div>
+  </section>
+
+  <p class="small muted center">
+    <a href="admin" style="color: inherit">Adminbereich</a>
+  </p>
+
+</main>
+
+<div id="toast"></div>
+<script src="gemeinsam.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
