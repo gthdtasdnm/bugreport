@@ -40,16 +40,15 @@ ss -tlnp                   # Gesamtübersicht
 
 | Port | Projekt | Prozessmanager | Verzeichnis |
 |---|---|---|---|
-| 3000 | pickup | PM2 | `/var/www/html/pickup` |
-| 8077 | double | systemd | `/var/www/html/double` |
-| 8078 | reflex | systemd | `/var/www/html/reflex` |
+| 3000 | keep | PM2 | `/var/www/html/keep` |
+| 8077 | seconds | systemd | `/var/www/html/seconds` |
+| 8078 | luckyreflex | systemd | `/var/www/html/luckyreflex` |
 | 8079 | bugreport | systemd | `/var/www/html/bugreport` |
-| 8090 | magictowers | PM2 | **`/opt/magictowers`** |
+| 8090 | cardchaos | PM2 | `/var/www/html/cardchaos` |
 
-**Das Verzeichnis steht nicht fest.** Magic Towers liegt unter `/opt`, nicht im
-DocumentRoot – und unter `/var/www/html/magictowers` liegt eine alte Kopie, die
-niemand ausliefert. Wer dort `git pull` macht, ändert nichts am laufenden Spiel.
-Vor jedem Deployment die Wahrheit beim Prozessmanager erfragen, nicht hier:
+Seit 08/2026 liegen alle Spiele im DocumentRoot und heissen wie ihr URL-Pfad.
+Trotzdem gilt: vor jedem Deployment die Wahrheit beim Prozessmanager erfragen,
+nicht hier:
 
 ```bash
 pm2 describe <projekt> | grep -E "exec cwd|script path"
@@ -129,7 +128,7 @@ selbst ab, falls doch etwas drin ist.
 ### 2. Dienst einrichten (systemd)
 
 Für neue Projekte **systemd**, nicht PM2: keine zusätzliche Abhängigkeit,
-Autostart ohne `pm2 startup`, Logs über `journalctl`. PickUp und Magic Towers
+Autostart ohne `pm2 startup`, Logs über `journalctl`. Keep und Card Chaos
 laufen historisch unter PM2 – das bleibt, wird aber nicht fortgeführt.
 
 ```bash

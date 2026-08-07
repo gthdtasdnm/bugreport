@@ -1,7 +1,7 @@
 # Bugreport
 
-Eine Seite, auf der Spieler Fehler in **Reflex Royale**, **PickUp**, **Magic
-Towers** und **Double** melden. Die Meldungen sind öffentlich sichtbar, damit
+Eine Seite, auf der Spieler Fehler in **Lucky Reflex**, **Keep**, **Card
+Chaos** und **Seconds** melden. Die Meldungen sind öffentlich sichtbar, damit
 niemand dreimal dasselbe schreibt; abgehakt werden sie auf einer Adminseite.
 
 Wie die vier Spiele: Deno, keine Abhängigkeiten, kein Build-Schritt, läuft
@@ -48,7 +48,7 @@ Alles JSON, alles unter `/api/`. Die Adminwege wollen den Header
 | `PATCH` | `/api/admin/meldungen/<id>` | Admin – `{status?, notiz?}` |
 | `DELETE` | `/api/admin/meldungen/<id>` | Admin – endgültig weg |
 
-`spiel` ist eins aus `reflex`, `pickup`, `magictowers`, `double`;
+`spiel` ist eins aus `luckyreflex`, `keep`, `cardchaos`, `seconds`;
 `schwere` eins aus `klein`, `stoert`, `abbruch`; `status` `offen` oder
 `erledigt`.
 
