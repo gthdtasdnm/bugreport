@@ -2,10 +2,10 @@
 // Bugkarte selbst. Kein Build-Schritt, deshalb ganz normale globale Funktionen.
 
 const SPIEL_NAME = {
-  reflex: 'Reflex Royale',
-  pickup: 'PickUp',
-  magictowers: 'Magic Towers',
-  double: 'Double',
+  luckyreflex: 'Lucky Reflex',
+  keep: 'Keep',
+  cardchaos: 'Card Chaos',
+  seconds: 'Seconds',
 };
 
 const SCHWERE_NAME = {

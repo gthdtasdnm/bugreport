@@ -1,4 +1,4 @@
-// Bugreport – Fehlermeldungen zu Reflex Royale, PickUp, Magic Towers und Double
+// Bugreport – Fehlermeldungen zu Lucky Reflex, Keep, Card Chaos und Seconds
 // Start:  deno run --allow-net --allow-read --allow-write --allow-env --allow-sys server.js
 //
 // Zero-Dependency: HTTP kommt komplett aus der Deno-Runtime, gespeichert wird
@@ -19,7 +19,7 @@ const ADMIN_TOKEN = Deno.env.get("BUGREPORT_ADMIN_TOKEN") ?? crypto.randomUUID()
 const TOKEN_AUS_ENV = Boolean(Deno.env.get("BUGREPORT_ADMIN_TOKEN"));
 
 // Muss zu den Optionen in public/index.html passen.
-const SPIELE = ["reflex", "pickup", "magictowers", "double"];
+const SPIELE = ["luckyreflex", "keep", "cardchaos", "seconds"];
 const SCHWERE = ["klein", "stoert", "abbruch"];
 const STATUS = ["offen", "erledigt"];
 
