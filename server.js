@@ -86,10 +86,23 @@ function einzeilig(wert, max) {
   return saubern(wert, max).replace(/\s+/g, " ");
 }
 
-/** Hinter Apache ist remoteAddr immer 127.0.0.1 – die echte IP steht im Header. */
+/**
+ * Hinter Apache ist remoteAddr immer 127.0.0.1 – die echte IP steht im Header.
+ *
+ * Entscheidend ist der **letzte** Eintrag. Einen mitgeschickten
+ * X-Forwarded-For schreibt Apache nicht neu, sondern hängt die tatsächlich
+ * verbundene Adresse hinten an. Wer selbst einen Header setzt, schiebt seine
+ * Wunschadresse also nach vorne – nur der letzte Eintrag stammt sicher von
+ * unserem eigenen Proxy. Mit dem ersten Eintrag liesse sich die Meldegrenze
+ * unten mit je einer frei erfundenen IP beliebig oft neu aufziehen, und im
+ * Feld `ip` einer Meldung stuende, was der Absender behauptet.
+ */
 function absender(req, info) {
   const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
+  if (fwd) {
+    const teile = fwd.split(",").map((s) => s.trim()).filter(Boolean);
+    if (teile.length) return teile[teile.length - 1];
+  }
   return info?.remoteAddr?.hostname ?? "unbekannt";
 }
 
