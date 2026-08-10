@@ -1,12 +1,38 @@
 // Gemeinsames für Startseite und Adminseite: Namen, Datum, Kurzmeldung und die
 // Bugkarte selbst. Kein Build-Schritt, deshalb ganz normale globale Funktionen.
 
-const SPIEL_NAME = {
-  luckyreflex: 'Lucky Reflex',
-  keep: 'Keep',
-  cardchaos: 'Card Chaos',
-  seconds: 'Seconds',
-};
+// Welche Spiele es gibt, weiss der Server (er liest es aus spiele.json).
+// Hier steht deshalb keine Liste mehr, sondern nur die Zuordnung
+// Kurzname -> Titel, die beim Laden der Seite gefüllt wird.
+const SPIEL_NAME = {};
+
+/**
+ * Spieleliste holen und SPIEL_NAME füllen.
+ * `spiele` sind die aktuellen, `alt` die nur noch in Meldungen vorkommenden.
+ */
+async function spieleLaden() {
+  try {
+    const antwort = await fetch('api/spiele');
+    const daten = await antwort.json();
+    const spiele = daten.spiele ?? [];
+    const alt = daten.alt ?? [];
+    for (const s of [...spiele, ...alt]) SPIEL_NAME[s.name] = s.titel;
+    return { spiele, alt };
+  } catch {
+    return { spiele: [], alt: [] };
+  }
+}
+
+/** Ein <select> mit Spielen füllen. `erste` ist der Eintrag ganz oben. */
+function spieleInSelect(feld, liste, erste) {
+  if (!feld) return;
+  const vorher = feld.value;
+  feld.replaceChildren(new Option(erste, ''));
+  // new Option() setzt den Text, nicht HTML – Titel kommen zwar aus unserer
+  // eigenen Datei, aber die Regel gilt hier für jeden Text von aussen.
+  for (const s of liste) feld.append(new Option(s.titel, s.name));
+  if (vorher && liste.some((s) => s.name === vorher)) feld.value = vorher;
+}
 
 const SCHWERE_NAME = {
   klein: 'Kleinigkeit',

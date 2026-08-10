@@ -49,8 +49,16 @@ $('abmelden').addEventListener('click', () => {
 });
 
 // ── Liste ───────────────────────────────────────────────────────────────────
+// Der Spielfilter kommt aus api/spiele – der Weg ist öffentlich, hier braucht
+// es kein Token. `alt` ist mit drin, sonst wären Meldungen zu abgeschalteten
+// Spielen nicht mehr auffindbar.
+spieleLaden().then(({ spiele, alt }) => {
+  spieleInSelect($('filterSpiel'), [...spiele, ...alt], 'Alle Spiele');
+  if (alle.length) zeichnen();
+});
+
+$('filterSpiel').addEventListener('change', (e) => { filterSpiel = e.target.value; zeichnen(); });
 for (const zeile of document.querySelectorAll('#verwaltung .filter')) {
-  gruppe(zeile, 'data-filter-spiel', (w) => { filterSpiel = w; zeichnen(); });
   gruppe(zeile, 'data-filter-status', (w) => { filterStatus = w; zeichnen(); });
 }
 

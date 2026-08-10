@@ -300,6 +300,14 @@ textarea:focus {
 .chip:hover { background: rgba(255, 255, 255, .1); }
 .chip.sel { background: rgba(255, 138, 61, .18); color: var(--ink); border-color: var(--akzent); }
 
+/* Der Spielfilter ist ein Auswahlfeld statt einer Knopfreihe: zwei Dutzend
+   Chips wären auf dem Handy sechs Zeilen Wand. Sieht aus wie ein Chip,
+   behält aber die 16px aus der Basis, sonst zoomt iOS beim Antippen. */
+.filter select {
+  width: auto; max-width: 100%; border-radius: 999px; padding: 8px 14px;
+  font-weight: 700; background-color: rgba(255, 255, 255, .05);
+}
+
 /* ── Meldungen ────────────────────────────────────────────────────────── */
 .liste { display: flex; flex-direction: column; gap: 10px; }
 .leer {

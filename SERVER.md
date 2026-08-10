@@ -292,7 +292,7 @@ Frame 0 und Elemente mit `opacity: 0`-Start fehlen scheinbar.
 | Apache | `/etc/apache2/conf-available/bugreport.conf` |
 | URL | https://inf-zeus.de/bugreport/ |
 
-Drei Abweichungen von der Vorlage oben:
+Vier Abweichungen von der Vorlage oben:
 
 **1. Kein WebSocket.** `proxy_wstunnel` und die beiden `/ws`-Zeilen entfallen,
 `proxy` und `proxy_http` reichen.
@@ -324,4 +324,17 @@ und nicht im Repo. Prüfen, ohne es ins Log zu schreiben:
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' -H "x-admin-token: <token>" \
      https://inf-zeus.de/bugreport/api/admin/pruefen      # 200 erwartet
+```
+
+**4. Der Dienst liest eine Datei außerhalb des Repos.** Die Spieleliste kommt
+aus `/var/www/html/spiele.json` (Vorgabe `../spiele.json`, umstellbar über
+`BUGREPORT_SPIELE`). `--allow-read` ist ohnehin gesetzt und `ProtectSystem=full`
+lässt Lesen überall zu, es ist also nichts einzurichten. Fehlt die Datei,
+startet der Dienst trotzdem und nimmt die Notliste aus `server.js`. Nach dem
+Start steht im Log, welche Datei gelesen wurde und wie viele Spiele darin
+standen:
+
+```bash
+journalctl -u bugreport -n 20 --no-pager | grep Spiele
+curl -s https://inf-zeus.de/bugreport/api/spiele | jq '.spiele | length'
 ```

@@ -1,4 +1,4 @@
-// Bugreport – Fehlermeldungen zu Lucky Reflex, Keep, Card Chaos und Seconds
+// Bugreport – Fehlermeldungen zu allen Spielen auf inf-zeus.de
 // Start:  deno run --allow-net --allow-read --allow-write --allow-env --allow-sys server.js
 //
 // Zero-Dependency: HTTP kommt komplett aus der Deno-Runtime, gespeichert wird
@@ -18,8 +18,6 @@ const DATA_FILE = Deno.env.get("BUGREPORT_DATA") ?? "./data/reports.json";
 const ADMIN_TOKEN = Deno.env.get("BUGREPORT_ADMIN_TOKEN") ?? crypto.randomUUID().slice(0, 8);
 const TOKEN_AUS_ENV = Boolean(Deno.env.get("BUGREPORT_ADMIN_TOKEN"));
 
-// Muss zu den Optionen in public/index.html passen.
-const SPIELE = ["luckyreflex", "keep", "cardchaos", "seconds"];
 const SCHWERE = ["klein", "stoert", "abbruch"];
 const STATUS = ["offen", "erledigt"];
 
@@ -27,6 +25,77 @@ const MAX_TITEL = 120;
 const MAX_TEXT = 2000;
 const MAX_NAME = 40;
 const MAX_MELDUNGEN = 2000;
+
+// ---------------------------------------------------------------------------
+// Welche Spiele es gibt
+//
+// Steht bewusst nirgends in diesem Repo, sondern kommt aus der spiele.json des
+// Servers – dieselbe Datei, aus der auch die Spieleübersicht lebt. Ein neues
+// Spiel taucht damit von allein im Formular auf, ohne dass hier jemand eine
+// Liste nachzieht. Die Datei wird beim Start und danach jede Minute gelesen.
+//
+// Fällt sie weg (etwa weil dieses Repo allein ausgecheckt ist), bleibt die
+// zuletzt gelesene Liste stehen; vor dem ersten erfolgreichen Lesen gilt die
+// Notliste unten. Der Dienst startet also auch ohne die Datei.
+// ---------------------------------------------------------------------------
+const SPIELE_DATEI = Deno.env.get("BUGREPORT_SPIELE") ??
+  new URL("../spiele.json", import.meta.url);
+const SPIELE_TAKT = 60_000;
+
+const SPIELE_NOTLISTE = [
+  { name: "luckyreflex", titel: "Lucky Reflex" },
+  { name: "keep", titel: "Keep" },
+  { name: "cardchaos", titel: "Card Chaos" },
+  { name: "seconds", titel: "Seconds" },
+];
+
+let spiele = SPIELE_NOTLISTE;
+let spieleGelesen = false;
+
+async function spieleLesen() {
+  let liste;
+  try {
+    const roh = JSON.parse(await Deno.readTextFile(SPIELE_DATEI));
+    liste = (roh.spiele ?? [])
+      // `art: "werkzeug"` ist der Bugreport selbst – kein Spiel, das man meldet.
+      .filter((s) => typeof s?.name === "string" && s.name && s.art !== "werkzeug")
+      .map((s) => ({ name: s.name, titel: typeof s.titel === "string" && s.titel ? s.titel : s.name }))
+      .sort((a, b) => a.titel.localeCompare(b.titel, "de"));
+    if (!liste.length) throw new Error("keine Spiele in der Datei");
+  } catch (e) {
+    // Nur einmal meckern, sonst füllt sich das Log jede Minute.
+    if (!spieleGelesen) {
+      console.warn(`  ⚠  ${SPIELE_DATEI} nicht lesbar (${e.message}) – Notliste mit ${spiele.length} Spielen.`);
+      spieleGelesen = true;
+    }
+    return;
+  }
+
+  const vorher = spiele.map((s) => s.name).join(",");
+  const nachher = liste.map((s) => s.name).join(",");
+  if (spieleGelesen && vorher !== nachher) {
+    console.log(`  🔄  Spieleliste aktualisiert: ${liste.length} Spiele.`);
+  }
+  spiele = liste;
+  spieleGelesen = true;
+}
+
+function istSpiel(name) {
+  return spiele.some((s) => s.name === name);
+}
+
+/**
+ * Spiele, zu denen es Meldungen gibt, die aber nicht mehr in spiele.json
+ * stehen – umbenannt oder abgeschaltet. Im Formular haben sie nichts verloren,
+ * im Filter der Liste schon, sonst sind ihre Meldungen nicht mehr zu finden.
+ */
+function alteSpiele() {
+  const weg = new Map();
+  for (const m of meldungen) {
+    if (!istSpiel(m.spiel) && !weg.has(m.spiel)) weg.set(m.spiel, { name: m.spiel, titel: m.spiel });
+  }
+  return [...weg.values()].sort((a, b) => a.titel.localeCompare(b.titel, "de"));
+}
 
 // ---------------------------------------------------------------------------
 // Speicher: eine JSON-Datei, im RAM gehalten, verzögert geschrieben
@@ -169,6 +238,12 @@ function oeffentlich(m) {
 async function api(req, url, info) {
   const pfad = url.pathname;
 
+  // --- Spieleliste (öffentlich) --------------------------------------------
+  // Formular und Filter bauen sich daraus. `alt` steht nur im Filter.
+  if (pfad === "/api/spiele" && req.method === "GET") {
+    return json({ spiele, alt: alteSpiele() });
+  }
+
   // --- Liste (öffentlich) ---------------------------------------------------
   if (pfad === "/api/meldungen" && req.method === "GET") {
     // Neueste zuerst, offene vor erledigten.
@@ -200,7 +275,7 @@ async function api(req, url, info) {
     // Für die sieht es aus, als hätte es geklappt – sonst probieren sie weiter.
     if (einzeilig(daten.webseite, 50)) return json({ ok: true, id: 0 }, 201);
 
-    const spiel = SPIELE.includes(daten.spiel) ? daten.spiel : null;
+    const spiel = istSpiel(daten.spiel) ? daten.spiel : null;
     const titel = einzeilig(daten.titel, MAX_TITEL);
     const beschreibung = saubern(daten.beschreibung, MAX_TEXT);
     const schritte = saubern(daten.schritte, MAX_TEXT);
@@ -315,6 +390,8 @@ async function serveStatic(pathname) {
 // Start
 // ---------------------------------------------------------------------------
 await laden();
+await spieleLesen();
+setInterval(() => spieleLesen(), SPIELE_TAKT);
 
 Deno.serve({ port: PORT, hostname: HOST, onListen: ({ port }) => {
   console.log(`\n  🐞  Bugreport läuft:  http://localhost:${port}`);
@@ -331,7 +408,8 @@ Deno.serve({ port: PORT, hostname: HOST, onListen: ({ port }) => {
   } else {
     console.log(`      Admin-Passwort:  ${ADMIN_TOKEN}  (gewürfelt – BUGREPORT_ADMIN_TOKEN setzen)`);
   }
-  console.log(`      Datei:           ${DATA_FILE}  (${meldungen.length} Meldungen)\n`);
+  console.log(`      Datei:           ${DATA_FILE}  (${meldungen.length} Meldungen)`);
+  console.log(`      Spiele:          ${SPIELE_DATEI}  (${spiele.length} Spiele)\n`);
 } }, (req, info) => {
   const url = new URL(req.url);
   if (url.pathname.startsWith("/api/")) {

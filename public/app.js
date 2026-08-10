@@ -24,6 +24,25 @@ gruppe(document.querySelector('.tabs'), 'data-tab', (tab) => {
 });
 
 
+// ── Spieleliste ─────────────────────────────────────────────────────────────
+// Formular und Filter werden aus api/spiele gebaut. Ein neues Spiel in
+// spiele.json steht damit hier von allein drin.
+//
+// Wer aus einem Spiel heraus kommt, kann es vorwählen lassen: ?spiel=snake.
+async function spieleAufbauen() {
+  const { spiele, alt } = await spieleLaden();
+  if (!spiele.length) return toast('Die Spieleliste konnte nicht geladen werden.', true);
+
+  spieleInSelect($('spiel'), spiele, '– bitte auswählen –');
+  spieleInSelect($('filterSpiel'), [...spiele, ...alt], 'Alle Spiele');
+
+  const wunsch = new URLSearchParams(location.search).get('spiel');
+  if (wunsch && spiele.some((s) => s.name === wunsch)) $('spiel').value = wunsch;
+
+  // War die Liste schneller da als die Titel, stehen dort noch die Kurznamen.
+  if (alle.length) zeichnen();
+}
+
 // ── Formular ────────────────────────────────────────────────────────────────
 gruppe($('schwere'), 'data-schwere', (wert) => { schwere = wert; });
 
@@ -70,8 +89,8 @@ $('senden').addEventListener('click', async () => {
 });
 
 // ── Liste ───────────────────────────────────────────────────────────────────
+$('filterSpiel').addEventListener('change', (e) => { filterSpiel = e.target.value; zeichnen(); });
 for (const zeile of document.querySelectorAll('#tab-liste .filter')) {
-  gruppe(zeile, 'data-filter-spiel', (w) => { filterSpiel = w; zeichnen(); });
   gruppe(zeile, 'data-filter-status', (w) => { filterStatus = w; zeichnen(); });
 }
 
@@ -108,4 +127,5 @@ function zeichnen() {
 }
 
 // Beim Laden zeigt die Seite das Formular – außer der Anker sagt etwas anderes.
+spieleAufbauen();
 tabZeigen(location.hash === '#liste' ? 'liste' : 'melden');
