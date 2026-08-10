@@ -1,5 +1,5 @@
 [Unit]
-Description=Bugreport – Fehlermeldungen zu den vier Spielen
+Description=Bugreport – Fehlermeldungen zu allen Spielen
 After=network.target
 
 [Service]
@@ -20,9 +20,18 @@ Environment=HOST=127.0.0.1
 # Die Meldungen liegen NICHT im DocumentRoot, sonst wären sie als Datei
 # abrufbar und ein `git pull` könnte sie überschreiben.
 Environment=BUGREPORT_DATA=/var/lib/bugreport/reports.json
-# Vor dem ersten Start setzen, sonst würfelt der Dienst bei jedem Neustart
-# ein neues Passwort:  systemctl edit bugreport  →  Environment=BUGREPORT_ADMIN_TOKEN=…
-Environment=BUGREPORT_ADMIN_TOKEN=bitte-aendern
+# Das Admin-Passwort steht bewusst NICHT in dieser Datei: sie liegt im Repo,
+# und das Repo liegt öffentlich auf GitHub. Ein Vorgabewert hier wäre ein
+# Passwort, das jeder nachlesen kann – auch bei jedem, der die Unit
+# unverändert übernimmt und das Ändern vergisst.
+#
+# Stattdessen vor dem ersten Start als Drop-in setzen, der nicht im Repo liegt:
+#     systemctl edit bugreport   →   [Service]
+#                                    Environment=BUGREPORT_ADMIN_TOKEN=…
+#
+# Ohne diesen Eintrag würfelt der Dienst bei jedem Start ein neues Passwort
+# und schreibt es ins Journal (`journalctl -u bugreport`). Unbequem, aber nie
+# öffentlich bekannt – und genau so soll die Vorgabe sich verhalten.
 # --------------------------------------------------------------------------
 
 # www-data darf nicht in sein Home schreiben; Deno legt seinen Cache sonst
