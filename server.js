@@ -49,6 +49,17 @@ const SPIELE_NOTLISTE = [
   { name: "seconds", titel: "Seconds" },
 ];
 
+// Nicht alles Kaputte gehört zu einem Spiel: die Übersicht, dieses Werkzeug
+// selbst, oder etwas, das überall auftritt. Diese Ziele stehen fest im Code –
+// sie kommen aus keiner Datei, weil sie keiner Datei entsprechen. Der
+// Unterstrich vorn hält sie von Spielnamen aus spiele.json fern, die immer
+// Pfadnamen ohne Unterstrich sind.
+const ORTE = [
+  { name: "_startseite", titel: "Startseite / Spieleübersicht" },
+  { name: "_bugreport", titel: "Bugreport (diese Seite)" },
+  { name: "_allgemein", titel: "Allgemein / etwas anderes" },
+];
+
 let spiele = SPIELE_NOTLISTE;
 let spieleGelesen = false;
 
@@ -81,7 +92,7 @@ async function spieleLesen() {
 }
 
 function istSpiel(name) {
-  return spiele.some((s) => s.name === name);
+  return spiele.some((s) => s.name === name) || ORTE.some((o) => o.name === name);
 }
 
 /**
@@ -241,7 +252,7 @@ async function api(req, url, info) {
   // --- Spieleliste (öffentlich) --------------------------------------------
   // Formular und Filter bauen sich daraus. `alt` steht nur im Filter.
   if (pfad === "/api/spiele" && req.method === "GET") {
-    return json({ spiele, alt: alteSpiele() });
+    return json({ spiele, orte: ORTE, alt: alteSpiele() });
   }
 
   // --- Liste (öffentlich) ---------------------------------------------------
@@ -282,7 +293,7 @@ async function api(req, url, info) {
     const melder = einzeilig(daten.melder, MAX_NAME);
     const schwere = SCHWERE.includes(daten.schwere) ? daten.schwere : "stoert";
 
-    if (!spiel) return fehler("Bitte ein Spiel auswählen.");
+    if (!spiel) return fehler("Bitte oben auswählen, wo der Fehler steckt.");
     if (titel.length < 3) return fehler("Der Titel ist zu kurz.");
     if (beschreibung.length < 10) return fehler("Bitte beschreibe den Fehler etwas genauer.");
 

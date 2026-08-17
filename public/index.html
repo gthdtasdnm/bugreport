@@ -16,6 +16,8 @@
     <p class="tag">Etwas kaputt? Hier rein.</p>
   </header>
 
+  <p class="zurueckzeile"><a class="zurueck" href="/spiele/">← Alle Spiele</a></p>
+
   <div class="tabs">
     <button class="seg sel" data-tab="melden">Fehler melden</button>
     <button class="seg" data-tab="liste">Gemeldete Fehler</button>
@@ -24,7 +26,7 @@
   <!-- ===================== Melden ===================== -->
   <section id="tab-melden" class="panel">
     <label class="field">
-      <span>Welches Spiel</span>
+      <span>Wo steckt der Fehler</span>
       <!-- Die Einträge kommen aus api/spiele, siehe app.js. -->
       <select id="spiel">
         <option value="">– wird geladen –</option>
@@ -85,7 +87,7 @@
          ein Auswahlfeld, während Status weiter Knöpfe bleiben. -->
     <div class="filter" style="margin: 14px 0">
       <select id="filterSpiel" aria-label="Nach Spiel filtern">
-        <option value="">Alle Spiele</option>
+        <option value="">Alles</option>
       </select>
     </div>
     <div class="filter" style="margin-bottom: 14px">

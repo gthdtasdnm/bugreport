@@ -52,8 +52,11 @@ $('abmelden').addEventListener('click', () => {
 // Der Spielfilter kommt aus api/spiele – der Weg ist öffentlich, hier braucht
 // es kein Token. `alt` ist mit drin, sonst wären Meldungen zu abgeschalteten
 // Spielen nicht mehr auffindbar.
-spieleLaden().then(({ spiele, alt }) => {
-  spieleInSelect($('filterSpiel'), [...spiele, ...alt], 'Alle Spiele');
+spieleLaden().then(({ spiele, orte, alt }) => {
+  spieleInSelect($('filterSpiel'), spiele, 'Alles', [
+    { titel: 'Kein Spiel', liste: orte },
+    { titel: 'Nicht mehr da', liste: alt },
+  ]);
   if (alle.length) zeichnen();
 });
 

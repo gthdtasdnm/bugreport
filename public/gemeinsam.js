@@ -15,23 +15,37 @@ async function spieleLaden() {
     const antwort = await fetch('api/spiele');
     const daten = await antwort.json();
     const spiele = daten.spiele ?? [];
+    const orte = daten.orte ?? [];
     const alt = daten.alt ?? [];
-    for (const s of [...spiele, ...alt]) SPIEL_NAME[s.name] = s.titel;
-    return { spiele, alt };
+    for (const s of [...spiele, ...orte, ...alt]) SPIEL_NAME[s.name] = s.titel;
+    return { spiele, orte, alt };
   } catch {
-    return { spiele: [], alt: [] };
+    return { spiele: [], orte: [], alt: [] };
   }
 }
 
-/** Ein <select> mit Spielen füllen. `erste` ist der Eintrag ganz oben. */
-function spieleInSelect(feld, liste, erste) {
+/**
+ * Ein <select> mit Spielen füllen. `erste` ist der Eintrag ganz oben,
+ * `gruppen` sind weitere Blöcke darunter – `[{ titel, liste }]`, jeder als
+ * <optgroup>. So stehen die Spiele oben und die Nicht-Spiele darunter,
+ * statt sich alphabetisch dazwischen zu mischen.
+ */
+function spieleInSelect(feld, liste, erste, gruppen = []) {
   if (!feld) return;
   const vorher = feld.value;
+  const alleEintraege = [...liste, ...gruppen.flatMap((g) => g.liste)];
   feld.replaceChildren(new Option(erste, ''));
   // new Option() setzt den Text, nicht HTML – Titel kommen zwar aus unserer
   // eigenen Datei, aber die Regel gilt hier für jeden Text von aussen.
   for (const s of liste) feld.append(new Option(s.titel, s.name));
-  if (vorher && liste.some((s) => s.name === vorher)) feld.value = vorher;
+  for (const g of gruppen) {
+    if (!g.liste.length) continue;
+    const block = document.createElement('optgroup');
+    block.label = g.titel;
+    for (const s of g.liste) block.append(new Option(s.titel, s.name));
+    feld.append(block);
+  }
+  if (vorher && alleEintraege.some((s) => s.name === vorher)) feld.value = vorher;
 }
 
 const SCHWERE_NAME = {

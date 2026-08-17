@@ -30,14 +30,15 @@ gruppe(document.querySelector('.tabs'), 'data-tab', (tab) => {
 //
 // Wer aus einem Spiel heraus kommt, kann es vorwählen lassen: ?spiel=snake.
 async function spieleAufbauen() {
-  const { spiele, alt } = await spieleLaden();
+  const { spiele, orte, alt } = await spieleLaden();
   if (!spiele.length) return toast('Die Spieleliste konnte nicht geladen werden.', true);
 
-  spieleInSelect($('spiel'), spiele, '– bitte auswählen –');
-  spieleInSelect($('filterSpiel'), [...spiele, ...alt], 'Alle Spiele');
+  const sonst = { titel: 'Kein Spiel', liste: orte };
+  spieleInSelect($('spiel'), spiele, '– bitte auswählen –', [sonst]);
+  spieleInSelect($('filterSpiel'), spiele, 'Alles', [sonst, { titel: 'Nicht mehr da', liste: alt }]);
 
   const wunsch = new URLSearchParams(location.search).get('spiel');
-  if (wunsch && spiele.some((s) => s.name === wunsch)) $('spiel').value = wunsch;
+  if (wunsch && [...spiele, ...orte].some((s) => s.name === wunsch)) $('spiel').value = wunsch;
 
   // War die Liste schneller da als die Titel, stehen dort noch die Kurznamen.
   if (alle.length) zeichnen();
@@ -60,7 +61,7 @@ $('senden').addEventListener('click', async () => {
 
   // Dieselben Prüfungen macht der Server noch einmal – hier nur, damit die
   // Rückmeldung ohne Netzwerkweg kommt.
-  if (!daten.spiel) return toast('Bitte oben ein Spiel auswählen.', true);
+  if (!daten.spiel) return toast('Bitte oben auswählen, wo der Fehler steckt.', true);
   if (daten.titel.trim().length < 3) return toast('Bitte einen Titel eintragen.', true);
   if (daten.beschreibung.trim().length < 10) return toast('Bitte den Fehler etwas genauer beschreiben.', true);
 

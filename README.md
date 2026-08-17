@@ -27,6 +27,18 @@ Verschwindet ein Spiel aus `spiele.json`, kann es niemand mehr melden – die
 alten Meldungen dazu bleiben aber sicht- und filterbar (`alt` in
 `GET /api/spiele`).
 
+Nicht alles Kaputte gehört zu einem Spiel. Deshalb stehen unter den Spielen
+drei feste Ziele, die aus keiner Datei kommen (`orte` in `GET /api/spiele`,
+im Formular als eigener Block „Kein Spiel"):
+
+| Kurzname | Wofür |
+|---|---|
+| `_startseite` | Startseite und Spieleübersicht |
+| `_bugreport` | dieses Werkzeug selbst |
+| `_allgemein` | überall, oder nichts davon |
+
+Der Unterstrich hält sie von Spielnamen fern – die sind immer Pfadnamen ohne.
+
 `/bugreport/?spiel=<kurzname>` wählt ein Spiel im Formular vor. Der
 Anleitungsdialog auf `spiele/` verlinkt so.
 
